@@ -31,12 +31,13 @@ public class DiscoveryService {
 			while(true) {
 				try {
 					socketReceiver = serverReceiver.accept();
-					System.out.println("Servidor Conectado");
+					
 					InputStreamReader isr = new InputStreamReader(socketReceiver.getInputStream());
 					BufferedReader entrada = new BufferedReader(isr);
 					String servidor = entrada.readLine();
+					System.out.println("---------------------------\nServidor "+servidor+" Conectado\n---------------------------");
 					DiscoveryService.recebeServidor(servidor);
-					System.out.println("Lista de servidores atualizada");
+//					System.out.println("Lista de servidores atualizada");
 					socketReceiver.close();
 				} catch (IOException e) {
 					e.printStackTrace();
@@ -47,10 +48,15 @@ public class DiscoveryService {
 	
 	public static void recebeServidor(String servidor) {
 		servidores.add(servidor);
-		System.out.println(servidores);
+//		System.out.println(servidores);
 	}
 	
 	public static List<String> retornaServidores(){
 		return servidores;
+	}
+	
+	protected static void atualizaLista(List<String> listaNova) {
+		servidores=listaNova;
+		System.out.println("---------------------------\nLista de servidores ativos\n "+servidores+"\n---------------------------");
 	}
 }
