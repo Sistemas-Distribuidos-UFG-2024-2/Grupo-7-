@@ -1,8 +1,8 @@
 package atividade1;
 
+import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.ObjectOutputStream;
-import java.io.PrintStream;
+import java.io.InputStreamReader;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.ArrayList;
@@ -13,7 +13,7 @@ public class DiscoveryService {
 	public static void main(String[] args) {
 		ServerSocket serverReceiver = null;
 		ServerSocket serverSender = null;
-		Socket socketSender;
+		Socket socketReceiver;
 		try {
 			serverReceiver = new ServerSocket(4998);
 			serverSender = new ServerSocket(4999);
@@ -23,16 +23,21 @@ public class DiscoveryService {
 			e.printStackTrace();
 		}
 		if(serverReceiver != null && serverSender!=null) {
-			DiscorevyServiceThread thread = new DiscorevyServiceThread(serverReceiver);
+			DiscorevyServiceThread thread = new DiscorevyServiceThread(serverSender);
 			thread.start();
+			HealthCheckerThread health = new HealthCheckerThread();
+			health.start();
+			//Bloco abaixo é reponsável por escutar os servidores que querem anunciar seus IP/porta
 			while(true) {
 				try {
-					socketSender = serverSender.accept();
-					System.out.println("Cliente Conectado");
-					ObjectOutputStream objectOutputStream = new ObjectOutputStream(socketSender.getOutputStream());
-					objectOutputStream.writeObject(retornaServidores());
-					System.out.println("Lista retornada para cliente");
-					socketSender.close();
+					socketReceiver = serverReceiver.accept();
+					System.out.println("Servidor Conectado");
+					InputStreamReader isr = new InputStreamReader(socketReceiver.getInputStream());
+					BufferedReader entrada = new BufferedReader(isr);
+					String servidor = entrada.readLine();
+					DiscoveryService.recebeServidor(servidor);
+					System.out.println("Lista de servidores atualizada");
+					socketReceiver.close();
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
