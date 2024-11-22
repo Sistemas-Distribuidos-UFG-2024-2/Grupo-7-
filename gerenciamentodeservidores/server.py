@@ -7,6 +7,29 @@ import sys
 
 running = True  
 
+#testa o valor passado pra porta e verifica se os 3 acima e abaixo estão disponíveis. 
+def pick_free_port_number():
+    number_port = int(input("Escolha uma porta para seu servidor\nRecomendamos valores acima de 5000\n:"))#Ainda não tem integração direta com o middlware. Ele sempre espera um servidor com porta 5001
+    host='127.0.0.1'
+    if (port_test(host, number_port)):
+        for port in range(number_port-3,number_port+3):
+            if (port_test(host,port)==False):
+                print(f"Sua porta não está livre para uso.\nPorém, a porta {port} está.")
+                break
+        return 0
+    else:
+        return number_port
+                
+#testa se a porta ta livre
+def port_test(host,port):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        try:
+            s.bind((host, port))
+            return False #porta livre
+        except socket.error:
+            return True  #porta em uso
+
+
 def handle_client(client_socket):
     cpu_usage = psutil.cpu_percent(interval=1)
     memory_info = psutil.virtual_memory().percent
@@ -32,8 +55,12 @@ def handle_client(client_socket):
     print("Resposta enviada com sucesso ao cliente com o status do servidor.")
     client_socket.close()
 
-def start_server(host='127.0.0.1', port=5001):
+def start_server(host='127.0.0.1'):
     global running
+    port = 0
+    while port==0:
+        port = pick_free_port_number()
+    #port_test("121.0.0.1", port)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
     server.listen(5)

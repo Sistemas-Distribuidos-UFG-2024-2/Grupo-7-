@@ -20,7 +20,7 @@ def save_history(resumes, filename='historico.json'):
         print(f"Histórico salvo em {filename}")
     except Exception as e:
         print(f"Erro ao salvar o histórico: {e}")
-
+    
 def load_history(filename='historico.json'):
     if os.path.exists(filename):
         try:
