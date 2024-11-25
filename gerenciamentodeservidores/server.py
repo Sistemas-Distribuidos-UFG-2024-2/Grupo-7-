@@ -7,6 +7,19 @@ import sys
 
 running = True  
 
+def announcement_server(host_server,port_server,host,port):
+    try:
+        announcement_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        announcement_socket.connect((host_server,port_server))
+        to_send = str(host)+":"+str(port)
+        announcement_socket.send(to_send.encode('utf-8'))
+        announcement_socket.close()
+        print("Anúncio realizado com sucesso")
+    except Exception as e:
+        print(f"Exceção encontrada ao anunciar endereço: {e}")
+        announcement_socket.close()
+
+
 #testa o valor passado pra porta e verifica se os 3 acima e abaixo estão disponíveis. 
 def pick_free_port_number():
     number_port = int(input("Escolha uma porta para seu servidor\nRecomendamos valores acima de 5000\n:"))#Ainda não tem integração direta com o middlware. Ele sempre espera um servidor com porta 5001
@@ -60,12 +73,15 @@ def start_server(host='127.0.0.1'):
     port = 0
     while port==0:
         port = pick_free_port_number()
-    #port_test("121.0.0.1", port)
     server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     server.bind((host, port))
+
+
     server.listen(5)
     server.settimeout(1)  
     print(f"Servidor iniciado com sucesso e ouvindo em {host}:{port}")
+
+    announcement_server("127.0.0.1",4999,host,port)
 
     def signal_handler(sig, frame):
         global running
