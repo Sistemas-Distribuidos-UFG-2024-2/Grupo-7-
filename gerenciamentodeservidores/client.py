@@ -11,6 +11,12 @@ uptime_first = uptime_last = None
 start_time = None
 last_resumes = []
 
+def select_server(client_socket_select): # função pra selecionar a porta do servidor que vai ser acessado
+    server_list = client_socket_select.recv(1024).decode('utf-8')
+    print(server_list)
+    port_return = input()
+    client_socket_select.send(port_return.encode('utf-8'))
+
 def save_history(resumes, filename='historico.json'):
     try:
         history = load_history(filename)
@@ -56,8 +62,17 @@ def request_server_status(middleware_host='127.0.0.1', middleware_port=5000):
         try:
             client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             client_socket.connect((middleware_host, middleware_port))
+
+            server_list = client_socket.recv(1024).decode('utf-8')
+            print(server_list)
+            port_return = input()
+            client_socket.send(port_return.encode('utf-8'))
+            print(client_socket.recv(1024).decode('utf-8'))
+            
             client_socket.send(b"status")
+            print("1")
             response = client_socket.recv(1024)
+            print("1")
             response_str = response.decode('utf-8')
 
             print("Atualização em tempo real")

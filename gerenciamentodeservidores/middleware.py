@@ -8,7 +8,18 @@ import sys
 running = True  
 list_servers = []
 
-def server_list(host, port):
+def client_server_select(client_socket):
+    client_socket.send((create_string_servers()+"\nSelecione o número de uma porta:").encode('utf-8'))
+    port = 0
+    port = client_socket.recv(1024).decode('utf-8')
+    #verificação da porta
+    print(port)
+    client_socket.send("Porta OK".encode('utf-8'))
+    return int(port)
+
+
+
+def server_list(host, port):# tem como objetivo abrir um socket para escutar os servidores que querem anunciar seus endereços
     while True:
         try:
             print("Escutando anúncio dos servidores...")
@@ -22,8 +33,11 @@ def server_list(host, port):
             
             list_servers.append(server)#armazena servidor na lista
             
-            for s in list_servers:
-                print(s)
+            #for s in list_servers:
+            #    print(s)
+
+            print(create_string_servers())            
+
             list_connect.close()
             list_socket.close()
         except Exception as e:
@@ -40,14 +54,27 @@ def server_list(host, port):
                 except Exception as e:
                     print(f"Erro ao fechar list_socket: {e}")
 
+def create_string_servers():# cria string com os servidores disponíveis
+    list = "Servidores Disponiveis:"
+    for server in list_servers:
+        list += "\n" + server
+    return list
 
 def handle_client(client_socket, server_host='127.0.0.1', server_port=5001):
     try:
+        server_list_to_send = create_string_servers()
+        while(server_port==5001 or server_port==0):
+            server_port = client_server_select(client_socket)
+            print(server_port)
+        
+        #client_socket.send(server_list_to_send.encode('utf-8'))
+
         server_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         server_socket.connect((server_host, server_port))
         print("Conexão com o servidor bem-sucedida para solicitar o status.")
         
         server_socket.send(b"status")
+        
         response = server_socket.recv(1024)
         
         client_socket.send(response)
@@ -64,6 +91,7 @@ def start_middleware(host='127.0.0.1', port=5000):
     middleware = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
     middleware.bind((host, port))
     
+    #thread pra escutar o anúncio dos servidores
     thread_listener = threading.Thread(target=server_list,args=("127.0.0.1",4999))
     thread_listener.start()
     
@@ -85,6 +113,7 @@ def start_middleware(host='127.0.0.1', port=5000):
         try:
             client_socket, addr = middleware.accept()
             print(f"Conexão bem-sucedida com o cliente de {addr}")
+            #client_server_select(client_socket)
             client_handler = threading.Thread(target=handle_client, args=(client_socket,))
             client_handler.start()
         except socket.timeout:
