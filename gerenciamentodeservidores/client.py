@@ -6,6 +6,9 @@ from datetime import datetime
 import os
 import json
 
+MIDDLEWARE_IP='127.0.0.1'
+MIDDLEWARE_PORT=5000
+
 cpu_sum = memory_sum = disk_sum = network_sum = counter = 0
 uptime_first = uptime_last = None
 start_time = None
@@ -16,6 +19,21 @@ def select_server(client_socket_select): # função pra selecionar a porta do se
     print(server_list)
     port_return = input()
     client_socket_select.send(port_return.encode('utf-8'))
+
+def start_connection(middleware_host, middleware_port):#inicia o socket com o middleware, passa a porta desejada e retorna o socket
+    try:
+        client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        client_socket.connect((middleware_host, middleware_port))
+        server_list = client_socket.recv(1024).decode('utf-8')
+        print(server_list)
+        port_return = input()
+        client_socket.send(port_return.encode('utf-8'))
+        print(client_socket.recv(1024).decode('utf-8'))
+        return client_socket
+    except Exception as e:
+            print(f"Erro: {e}")
+
+
 
 def save_history(resumes, filename='historico.json'):
     try:
@@ -56,23 +74,19 @@ def request_server_status(middleware_host='127.0.0.1', middleware_port=5000):
     signal.signal(signal.SIGINT, signal_handler)
     
     start_time = datetime.now()
+    print("----------------------------------------------------------------------------")
     print(f"Cliente iniciado às: {start_time.strftime('%Y-%m-%d %H:%M:%S')}")
+    print("----------------------------------------------------------------------------")
+
+    client_socket = start_connection(MIDDLEWARE_IP, MIDDLEWARE_PORT)
     
+
     while True:
         try:
-            client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            client_socket.connect((middleware_host, middleware_port))
-
-            server_list = client_socket.recv(1024).decode('utf-8')
-            print(server_list)
-            port_return = input()
-            client_socket.send(port_return.encode('utf-8'))
-            print(client_socket.recv(1024).decode('utf-8'))
-            
             client_socket.send(b"status")
-            print("1")
+
             response = client_socket.recv(1024)
-            print("1")
+
             response_str = response.decode('utf-8')
 
             print("Atualização em tempo real")
@@ -117,9 +131,10 @@ def request_server_status(middleware_host='127.0.0.1', middleware_port=5000):
 
             print()
 
-            client_socket.close()
+            #client_socket.close()
         except Exception as e:
             print(f"Erro: {e}")
+            client_socket.close()
         time.sleep(1)
 
 if __name__ == "__main__":

@@ -19,21 +19,19 @@ def announcement_server(host_server,port_server,host,port):
         print(f"Exceção encontrada ao anunciar endereço: {e}")
         announcement_socket.close()
     
-#testa o valor passado pra porta e verifica se os 3 acima e abaixo estão disponíveis. 
-def pick_free_port_number():
-    number_port = int(input("Escolha uma porta para seu servidor\nRecomendamos valores acima de 5000\n:"))#Ainda não tem integração direta com o middlware. Ele sempre espera um servidor com porta 5001
+def pick_free_port_number(): #testa o valor passado pra porta e verifica se os 3 acima e abaixo estão disponíveis.
+    number_port = int(input("Escolha uma porta para seu servidor\nRecomendamos valores acima de 5000: "))
     host='127.0.0.1'
     if (port_test(host, number_port)):
         for port in range(number_port-3,number_port+3):
             if (port_test(host,port)==False):
-                print(f"Sua porta não está livre para uso.\nPorém, a porta {port} está.")
+                print(f"Sua porta não está livre para uso.\nPorém, a porta {port} está.\n")
                 break
         return 0
     else:
         return number_port
                 
-#testa se a porta ta livre
-def port_test(host,port):
+def port_test(host,port): #testa se a porta ta livre
     with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
         try:
             s.bind((host, port))
@@ -41,30 +39,37 @@ def port_test(host,port):
         except socket.error:
             return True  #porta em uso
 
+def socket_test(socket_test): #testa se o socket continua aberto, enviando uma mensagem que n consome dados do buffer, apenas verifica se está aberto
+    try:
+        socket_test.send(b'', socket.MSG_PEEK)
+        return True
+    except (socket.error, BrokenPipeError):
+        return False
 
 def handle_client(client_socket):
-    cpu_usage = psutil.cpu_percent(interval=1)
-    memory_info = psutil.virtual_memory().percent
-    disk_usage = psutil.disk_usage('/').percent
+    while socket_test(client_socket):
+        cpu_usage = psutil.cpu_percent(interval=1)
+        memory_info = psutil.virtual_memory().percent
+        disk_usage = psutil.disk_usage('/').percent
 
-    network_status = "Inativo"
-    for interface, stats in psutil.net_if_stats().items():
-        if stats.isup:
-            network_status = "Ativo"
-            break
+        network_status = "Inativo"
+        for interface, stats in psutil.net_if_stats().items():
+            if stats.isup:
+                network_status = "Ativo"
+                break
 
-    uptime = time.time() - psutil.boot_time()
+        uptime = time.time() - psutil.boot_time()
 
-    response = (
-        f"Uso de CPU: {cpu_usage}% | "
-        f"Uso de Memória: {memory_info}% | "
-        f"Uso de Disco: {disk_usage}% | "
-        f"Status da Rede: {network_status} | "
-        f"Tempo de Atividade: {uptime / 3600:.2f} horas"
-    )
+        response = (
+            f"Uso de CPU: {cpu_usage}% | "
+            f"Uso de Memória: {memory_info}% | "
+            f"Uso de Disco: {disk_usage}% | "
+            f"Status da Rede: {network_status} | "
+            f"Tempo de Atividade: {uptime / 3600:.2f} horas"
+        )
 
-    client_socket.send(response.encode('utf-8'))
-    print("Resposta enviada com sucesso ao cliente com o status do servidor.")
+        client_socket.send(response.encode('utf-8'))
+        print("Resposta enviada com sucesso ao cliente com o status do servidor.")
     client_socket.close()
 
 def start_server(host='127.0.0.1'):
