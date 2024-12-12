@@ -14,6 +14,14 @@ uptime_first = uptime_last = None
 start_time = None
 last_resumes = []
 
+def socket_test(socket_test): #testa se o socket continua aberto, enviando uma mensagem que n consome dados do buffer, apenas verifica se está aberto
+    try:
+        socket_test.send(b'', socket.MSG_PEEK)
+        return True
+    except (socket.error, BrokenPipeError):
+        return False
+
+
 def select_server(client_socket_select): # função pra selecionar a porta do servidor que vai ser acessado
     server_list = client_socket_select.recv(1024).decode('utf-8')
     print(server_list)
@@ -81,7 +89,7 @@ def request_server_status(middleware_host='127.0.0.1', middleware_port=5000):
     client_socket = start_connection(MIDDLEWARE_IP, MIDDLEWARE_PORT)
     
 
-    while True:
+    while socket_test(client_socket):
         try:
             client_socket.send(b"status")
 

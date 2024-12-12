@@ -4,12 +4,46 @@ import socket
 import threading
 import signal
 import sys
+import pickle #usado para serialização do set para envio ao health checker
+import time
 
 running = True  
 list_servers = set()
+#last_updade = set()
 
 SERVER_LIST_IP = "127.0.0.1"
 SERVER_LIST_PORT = 4999
+
+HEALTH_CHECKER_IP = "127.0.0.1"
+HEALTH_CHECKER_PORT = 4998
+
+def update(last_update):
+    list_servers.clear()
+    for server in last_update:
+        list_servers.add(server)
+    
+
+def health_checker_connection ():
+    try:
+        health_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        health_socket.bind((HEALTH_CHECKER_IP, HEALTH_CHECKER_PORT))
+        health_socket.listen(5)
+
+        health_connection, addr = health_socket.accept()
+
+        print(f"Health Checker conectado - {addr}")
+        
+        while socket_test(health_connection):
+            servers_send = pickle.dumps(list_servers) #serializa o set para enviar al health_checker
+            health_connection.sendall(servers_send)
+            servers_on = set()
+            servers_on_set = health_connection.recv(1024)
+            last_update = pickle.loads(servers_on_set)
+            print(f"Servidores Online:\n{last_update}")
+            update(last_update)
+            time.sleep(2)
+    except Exception as e:
+        print(f"Erro ao se comunicar com o Health_checker: {e}")
 
 def client_server_select(client_socket): #melhorar isso aqui
     client_socket.send((create_string_servers()+"\nSelecione o número de uma porta:").encode('utf-8'))
@@ -99,6 +133,9 @@ def start_middleware(host='127.0.0.1', port=5000):
     thread_listener = threading.Thread(target=server_list,args=(SERVER_LIST_IP,SERVER_LIST_PORT))
     thread_listener.start()
     
+    thread_health_checker = threading.Thread(target=health_checker_connection,args=())
+    thread_health_checker.start()
+
     middleware.listen(5)
     middleware.settimeout(1)  
     print(f"Middleware iniciado com sucesso e ouvindo em {host}:{port}")
