@@ -91,7 +91,8 @@ O sistema utiliza uma estrutura cliente-servidor com um software intermediário.
 
 ## Diagrama de Classe
 
-![Diagrama_de_Classe](https://drive.google.com/file/d/1sIkCcPGylcTlKhV1Wr6DeqcUdEL2bwHC/view?usp=sharing)
+![Classe](https://github.com/user-attachments/assets/c1461ddc-2211-4754-84ba-289b8021b89d)
+
 **1. Middleware:**
 **Atributos:**
 - list_servers: Uma lista que armazena as informações dos servidores registrados (IP e porta).
@@ -128,5 +129,5 @@ O sistema utiliza uma estrutura cliente-servidor com um software intermediário.
 - parse_status(): Analisa a resposta do servidor contendo as informações de status.
 
 ## Diagrama de Sequência 
-![Diagrama_de_Sequencia](https://drive.google.com/file/d/1diKXJROFlpkjWIptzfZfdnZLKg_p-I-5/view?usp=sharing)
+![Sequencia](https://github.com/user-attachments/assets/864d328b-e321-4f17-aa19-738bea8685fd)
 
