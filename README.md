@@ -15,9 +15,7 @@ Para implementar o sistema distribuído (composto por cliente, servidor e middle
 Usamos uma variedade de bibliotecas para o funcionamento do sistema, se ainda não estiver instalada, siga as instruções a seguir:
 
 socket: Para comunicação de rede
-''' 
-pip install socket
-'''
+'''pip install socket'''
 time: Para pausas e temporização
 ''' 
 pip install time
