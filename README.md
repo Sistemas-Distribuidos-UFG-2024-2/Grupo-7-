@@ -15,7 +15,9 @@ Para implementar o sistema distribuído (composto por cliente, servidor e middle
 Usamos uma variedade de bibliotecas para o funcionamento do sistema, se ainda não estiver instalada, siga as instruções a seguir:
 
 socket: Para comunicação de rede
-'''pip install socket'''
+```
+pip install socket
+```
 time: Para pausas e temporização
 ''' 
 pip install time
@@ -117,7 +119,7 @@ Métodos:
 Atributos:
 - cpu_sum: Armazena a soma dos valores de CPU para calcular a média.
 - memory_sum: Armazena a soma dos valores de memória para calcular a média.
-...: Outros atributos para armazenar somas e informações relevantes para o cliente (disco, rede, etc.).
+- ...: Outros atributos para armazenar somas e informações relevantes para o cliente (disco, rede, etc.).
 Métodos:
 - request_server_status(): Envia uma solicitação de status para o servidor selecionado (via middleware).
 - start_connection(): Inicia a conexão com o middleware.
