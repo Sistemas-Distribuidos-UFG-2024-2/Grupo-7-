@@ -5,6 +5,8 @@ import sys
 from datetime import datetime
 import os
 import json
+import tkinter as tk
+
 
 MIDDLEWARE_IP='127.0.0.1'
 MIDDLEWARE_PORT=5000
@@ -22,6 +24,30 @@ def socket_test(socket_test): #testa se o socket continua aberto, enviando uma m
         return False
 
 
+def get_port_from_user(server_list):
+    port_return = None  
+
+    def submit():
+        nonlocal port_return
+        port_return = entry.get()  
+        janela.destroy()  
+
+    janela = tk.Tk()
+    janela.title("Selecionar Porta")
+
+    label = tk.Label(janela, text=f"Lista de Servidores:\n{server_list}", font=("Arial", 20))
+    label.pack(pady=10)
+
+    entry = tk.Entry(janela)
+    entry.pack(pady=10)
+
+    botao = tk.Button(janela, text="Confirmar", command=submit)
+    botao.pack(pady=10)
+
+    janela.mainloop()
+
+    return port_return
+
 def select_server(client_socket_select): # função pra selecionar a porta do servidor que vai ser acessado
     server_list = client_socket_select.recv(1024).decode('utf-8')
     print(server_list)
@@ -33,8 +59,10 @@ def start_connection(middleware_host, middleware_port):#inicia o socket com o mi
         client_socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         client_socket.connect((middleware_host, middleware_port))
         server_list = client_socket.recv(1024).decode('utf-8')
+        #fazer uma classe que o método chamado vai retornar a porta inserida
+        
         print(server_list)
-        port_return = input()
+        port_return = get_port_from_user(server_list)
         client_socket.send(port_return.encode('utf-8'))
         print(client_socket.recv(1024).decode('utf-8'))
         return client_socket
@@ -87,7 +115,6 @@ def request_server_status(middleware_host='127.0.0.1', middleware_port=5000):
     print("----------------------------------------------------------------------------")
 
     client_socket = start_connection(MIDDLEWARE_IP, MIDDLEWARE_PORT)
-    
 
     while socket_test(client_socket):
         try:
@@ -137,13 +164,13 @@ def request_server_status(middleware_host='127.0.0.1', middleware_port=5000):
                 
                 cpu_sum = memory_sum = disk_sum = network_sum = counter = 0
 
-            print()
-
             #client_socket.close()
         except Exception as e:
             print(f"Erro: {e}")
             client_socket.close()
         time.sleep(1)
 
+
 if __name__ == "__main__":
     request_server_status()
+

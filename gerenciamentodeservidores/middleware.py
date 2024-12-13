@@ -41,7 +41,7 @@ def health_checker_connection ():
             last_update = pickle.loads(servers_on_set)
             print(f"Servidores Online:\n{last_update}")
             update(last_update)
-            time.sleep(2)
+            #time.sleep(2)
     except Exception as e:
         print(f"Erro ao se comunicar com o Health_checker: {e}")
 
