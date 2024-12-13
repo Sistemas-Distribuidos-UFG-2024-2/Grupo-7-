@@ -51,6 +51,11 @@ Primeiramente, o Middleware precisa estar em execução para que os servidores p
 python middleware.py
 ```
 
+Posteriormente, incia o Health Checker para estabelecer uma conexão persistente com o Middleware.
+```
+python healthchecker.py
+```
+
 Em seguida, o(s) Servidor(es), deve-se iniciar a execução de um ou mais servidores. Eles se registrarão automaticamente com o middleware. E devemos escolher uma porta para o servidor acima de 5000.
 ```
 python server.py
@@ -62,7 +67,13 @@ python client.py
 ```
 
 ## Arquitetura do Sistema
-O sistema utiliza uma estrutura cliente-servidor com um software intermediário. O middleware permite o registro de vários servidores, enquanto os clientes se conectam a ele para utilizar os serviços disponibilizados pelos servidores. O middleware desempenha o papel de um intermediário, administrando as conexões e direcionando as solicitações dos clientes para o servidor adequado.
+O sistema adota uma arquitetura cliente-servidor com um componente intermediário (Middleware) e um monitor de saúde (Health Checker). Ele se caracteriza por:
+
+**Middleware**: O Middleware atua como um ponto intermediador de comunicação, gerenciando o registro dos servidores e o encaminhamento das requisições dos clientes.
+
+**Monitoramento de Saúde**: O Health Checker verifica periodicamente o status dos servidores e informa ao Middleware quais estão online, garantindo que os clientes se conectem apenas a servidores funcionais.
+
+**Escalabilidade:** A arquitetura permite a fácil adição de novos servidores sem impactar o cliente ou o Health Checker.
 
 ## Regras de Negócio 
 
@@ -74,6 +85,20 @@ O sistema utiliza uma estrutura cliente-servidor com um software intermediário.
 - Aceita a seleção do cliente e cria uma ligação com o servidor selecionado.
 - Encaminha as solicitações do cliente para o servidor.
 - Retorna as respostas do servidor para o cliente.
+
+**Health Checker**
+
+- Verifica periodicamente o status dos servidores.
+- Mantém uma conexão TCP persistente com o Middleware.
+- Recebe do Middleware a lista de servidores registrados (IP e porta).
+- Tenta conectar a cada servidor na lista. 
+- Usa timeout para evitar bloqueios. 
+- Determina o status online/offline de cada servidor.
+- Envia mensagem de "ping" para verificação mais robusta.
+- Envia ao Middleware a lista de servidores online.
+- Lida com erros de conexão e evita interrupções.
+- O Middleware usa as informações do Health Checker para fornecer aos clientes apenas servidores online.
+
 
 **Servidor:**
 
@@ -95,7 +120,7 @@ O sistema utiliza uma estrutura cliente-servidor com um software intermediário.
 
 ## Diagrama de Classe
 
-![Classe](https://github.com/user-attachments/assets/c1461ddc-2211-4754-84ba-289b8021b89d)
+![classse](https://github.com/user-attachments/assets/af350610-1d61-412c-b534-71932a5153bc)
 
 **1. Middleware:**
 
@@ -144,6 +169,18 @@ O sistema utiliza uma estrutura cliente-servidor com um software intermediário.
 - load_history(): Carrega o histórico de uso de recursos de um arquivo.
 - parse_status(): Analisa a resposta do servidor contendo as informações de status.
 
+**4. HealthChecker:**
+
+**Atributos:**
+
+- HEALTH_CHECKER_IP: Endereço IP do Health Checker.
+- HEALTH_CHECKER_PORT: Porta do Health Checker.
+
+**Métodos:**
+
+- start_health_checker(): Inicia o Health Checker.
+- check_server_health(servers): Verifica a saúde dos servidores recebidos como parâmetro.
+
 ## Diagrama de Sequência 
-![Sequencia](https://github.com/user-attachments/assets/864d328b-e321-4f17-aa19-738bea8685fd)
+![sequencia](https://github.com/user-attachments/assets/229b254c-8f8b-46aa-b973-f2e185a34237)
 
