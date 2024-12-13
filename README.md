@@ -69,7 +69,7 @@ python client.py
 ## Arquitetura do Sistema
 O sistema adota uma arquitetura cliente-servidor com um componente intermediário (Middleware) e um monitor de saúde (Health Checker). Ele se caracteriza por:
 
-**Comunicação Centralizada**: O Middleware atua como um ponto central de comunicação, gerenciando o registro dos servidores e o encaminhamento das requisições dos clientes.
+**Middleware**: O Middleware atua como um ponto intermediador de comunicação, gerenciando o registro dos servidores e o encaminhamento das requisições dos clientes.
 
 **Monitoramento de Saúde**: O Health Checker verifica periodicamente o status dos servidores e informa ao Middleware quais estão online, garantindo que os clientes se conectem apenas a servidores funcionais.
 
